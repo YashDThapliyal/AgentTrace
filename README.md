@@ -1,7 +1,7 @@
 
-# AgentTrace<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/d058d5a3-ba3c-4f53-b48b-22911b3dd933" />
+<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/d058d5a3-ba3c-4f53-b48b-22911b3dd933" />
 
-
+# AgentTrace
 > Reasoning memory for AI agents. Save what worked. Recall it next time.
 
 AgentTrace is a lightweight Python library that saves successful agent reasoning traces and surfaces them on future runs. When an agent solves a problem, the trace gets stored. The next time a similar problem comes up, the agent gets that context injected — so it doesn't start from zero.
