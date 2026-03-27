@@ -1,0 +1,7 @@
+{
+  "backend": "jsonl",
+  "store_path": "~/.agenttrace/traces.jsonl",
+  "embeddings_provider": "local",
+  "top_k": 3,
+  "threshold": 0.75
+}
