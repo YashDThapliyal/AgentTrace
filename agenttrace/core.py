@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
+from typing import IO
 
 from agenttrace.config import AgentTraceConfig
 from agenttrace.embeddings.base import EmbeddingProvider, get_provider
@@ -20,10 +21,11 @@ def _now_utc() -> str:
 class AgentTrace:
     """Orchestrates save and recall flows for the AgentTrace library."""
 
-    def __init__(self, config: AgentTraceConfig) -> None:
+    def __init__(self, config: AgentTraceConfig, status_io: IO[str] | None = None) -> None:
         self._config = config
         self._storage: StorageBackend | None = None
         self._embedder: EmbeddingProvider | None = None
+        self._status_io = status_io
 
     def _get_storage(self) -> StorageBackend:
         if self._storage is None:
@@ -41,7 +43,7 @@ class AgentTrace:
 
     def _get_embedder(self) -> EmbeddingProvider:
         if self._embedder is None:
-            self._embedder = get_provider(self._config)
+            self._embedder = get_provider(self._config, status_io=self._status_io)
         return self._embedder
 
     def save(

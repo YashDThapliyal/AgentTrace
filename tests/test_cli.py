@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import json
+import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
 from click.testing import CliRunner
 
-from agenttrace.cli import cli
+import agenttrace as _api
+from agenttrace.cli import _get_core, cli
 from agenttrace.config import AgentTraceConfig
 from agenttrace.core import AgentTrace
 
@@ -40,6 +42,18 @@ def at_with_trace(tmp_path):
         tags=["python", "concurrency"],
     )
     return at, trace_id
+
+
+# ---------------------------------------------------------------------------
+# _get_core
+# ---------------------------------------------------------------------------
+
+class TestGetCore:
+    def test_sets_status_io_to_stderr(self, monkeypatch):
+        mock_instance = MagicMock()
+        monkeypatch.setattr(_api, "_get_instance", lambda: mock_instance)
+        result = _get_core()
+        assert result._status_io is sys.stderr
 
 
 # ---------------------------------------------------------------------------

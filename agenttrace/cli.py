@@ -17,8 +17,10 @@ from agenttrace.core import AgentTrace
 
 
 def _get_core() -> AgentTrace:
-    """Return the module-level singleton, auto-initializing if needed."""
-    return _api._get_instance()
+    """Return the module-level singleton with stderr status output enabled."""
+    instance = _api._get_instance()
+    instance._status_io = sys.stderr
+    return instance
 
 
 # ---------------------------------------------------------------------------

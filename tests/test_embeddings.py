@@ -1,6 +1,7 @@
 """Tests for all embedding providers."""
 from __future__ import annotations
 
+import io
 import os
 from unittest.mock import MagicMock, patch
 
@@ -87,6 +88,49 @@ class TestLocalEmbedder:
 
         # Model constructor called once despite two embed() calls
         assert mock_st_cls.call_count == 1
+
+    def test_loading_message_printed_on_cold_start(self):
+        mock_model = MagicMock()
+        mock_model.encode.return_value = MagicMock(tolist=lambda: _FAKE_EMBEDDING_384)
+        mock_st_cls = MagicMock(return_value=mock_model)
+
+        status_out = io.StringIO()
+        with patch.dict("sys.modules", {"sentence_transformers": MagicMock(SentenceTransformer=mock_st_cls)}):
+            from importlib import reload
+            import agenttrace.embeddings.local as local_mod
+            reload(local_mod)
+            embedder = local_mod.LocalEmbedder(status_io=status_out)
+            embedder.embed("test text")
+
+        assert "Loading embedding model" in status_out.getvalue()
+
+    def test_loading_message_printed_only_once(self):
+        mock_model = MagicMock()
+        mock_model.encode.return_value = MagicMock(tolist=lambda: _FAKE_EMBEDDING_384)
+        mock_st_cls = MagicMock(return_value=mock_model)
+
+        status_out = io.StringIO()
+        with patch.dict("sys.modules", {"sentence_transformers": MagicMock(SentenceTransformer=mock_st_cls)}):
+            from importlib import reload
+            import agenttrace.embeddings.local as local_mod
+            reload(local_mod)
+            embedder = local_mod.LocalEmbedder(status_io=status_out)
+            embedder.embed("first call")
+            embedder.embed("second call")  # warm path
+
+        assert status_out.getvalue().count("Loading embedding model") == 1
+
+    def test_no_output_when_status_io_not_set(self):
+        mock_model = MagicMock()
+        mock_model.encode.return_value = MagicMock(tolist=lambda: _FAKE_EMBEDDING_384)
+        mock_st_cls = MagicMock(return_value=mock_model)
+
+        with patch.dict("sys.modules", {"sentence_transformers": MagicMock(SentenceTransformer=mock_st_cls)}):
+            from importlib import reload
+            import agenttrace.embeddings.local as local_mod
+            reload(local_mod)
+            embedder = local_mod.LocalEmbedder()  # no status_io — silent by default
+            embedder.embed("test text")  # must not raise
 
     def test_import_error_raises_helpful_message(self):
         import sys
