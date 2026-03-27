@@ -4,8 +4,6 @@ from __future__ import annotations
 import uuid
 from unittest.mock import MagicMock
 
-import pytest
-
 from agenttrace.config import AgentTraceConfig
 from agenttrace.core import AgentTrace
 from agenttrace.storage.jsonl import JsonlBackend

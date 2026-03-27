@@ -2,14 +2,12 @@
 from __future__ import annotations
 
 import io
-import os
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from agenttrace.config import AgentTraceConfig
 from agenttrace.embeddings.base import EmbeddingProvider, get_provider
-
 
 # ---------------------------------------------------------------------------
 # Shared helpers
@@ -63,8 +61,10 @@ class TestLocalEmbedder:
         mock_model.encode.return_value = MagicMock(tolist=lambda: _FAKE_EMBEDDING_384)
         mock_st_cls = MagicMock(return_value=mock_model)
 
-        with patch.dict("sys.modules", {"sentence_transformers": MagicMock(SentenceTransformer=mock_st_cls)}):
+        mock_st_module = MagicMock(SentenceTransformer=mock_st_cls)
+        with patch.dict("sys.modules", {"sentence_transformers": mock_st_module}):
             from importlib import reload
+
             import agenttrace.embeddings.local as local_mod
             reload(local_mod)
             embedder = local_mod.LocalEmbedder()
@@ -78,8 +78,10 @@ class TestLocalEmbedder:
         mock_model.encode.return_value = MagicMock(tolist=lambda: _FAKE_EMBEDDING_384)
         mock_st_cls = MagicMock(return_value=mock_model)
 
-        with patch.dict("sys.modules", {"sentence_transformers": MagicMock(SentenceTransformer=mock_st_cls)}):
+        mock_st_module = MagicMock(SentenceTransformer=mock_st_cls)
+        with patch.dict("sys.modules", {"sentence_transformers": mock_st_module}):
             from importlib import reload
+
             import agenttrace.embeddings.local as local_mod
             reload(local_mod)
             embedder = local_mod.LocalEmbedder()
@@ -95,8 +97,10 @@ class TestLocalEmbedder:
         mock_st_cls = MagicMock(return_value=mock_model)
 
         status_out = io.StringIO()
-        with patch.dict("sys.modules", {"sentence_transformers": MagicMock(SentenceTransformer=mock_st_cls)}):
+        mock_st_module = MagicMock(SentenceTransformer=mock_st_cls)
+        with patch.dict("sys.modules", {"sentence_transformers": mock_st_module}):
             from importlib import reload
+
             import agenttrace.embeddings.local as local_mod
             reload(local_mod)
             embedder = local_mod.LocalEmbedder(status_io=status_out)
@@ -110,8 +114,10 @@ class TestLocalEmbedder:
         mock_st_cls = MagicMock(return_value=mock_model)
 
         status_out = io.StringIO()
-        with patch.dict("sys.modules", {"sentence_transformers": MagicMock(SentenceTransformer=mock_st_cls)}):
+        mock_st_module = MagicMock(SentenceTransformer=mock_st_cls)
+        with patch.dict("sys.modules", {"sentence_transformers": mock_st_module}):
             from importlib import reload
+
             import agenttrace.embeddings.local as local_mod
             reload(local_mod)
             embedder = local_mod.LocalEmbedder(status_io=status_out)
@@ -125,8 +131,10 @@ class TestLocalEmbedder:
         mock_model.encode.return_value = MagicMock(tolist=lambda: _FAKE_EMBEDDING_384)
         mock_st_cls = MagicMock(return_value=mock_model)
 
-        with patch.dict("sys.modules", {"sentence_transformers": MagicMock(SentenceTransformer=mock_st_cls)}):
+        mock_st_module = MagicMock(SentenceTransformer=mock_st_cls)
+        with patch.dict("sys.modules", {"sentence_transformers": mock_st_module}):
             from importlib import reload
+
             import agenttrace.embeddings.local as local_mod
             reload(local_mod)
             embedder = local_mod.LocalEmbedder()  # no status_io — silent by default
@@ -138,6 +146,7 @@ class TestLocalEmbedder:
         modules_backup = sys.modules.pop("sentence_transformers", None)
         try:
             from importlib import reload
+
             import agenttrace.embeddings.local as local_mod
             reload(local_mod)
             embedder = local_mod.LocalEmbedder()

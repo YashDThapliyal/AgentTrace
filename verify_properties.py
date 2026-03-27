@@ -5,13 +5,24 @@ Each check prints exact output and PASS/FAIL.
 """
 from __future__ import annotations
 
+import json
 import math
 import os
 import sys
 import tempfile
+from pathlib import Path
+from unittest.mock import MagicMock
 
 # Run from repo root
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from agenttrace.config import AgentTraceConfig, load_config
+from agenttrace.core import AgentTrace
+from agenttrace.injection import format_traces
+from agenttrace.retrieval import rank
+from agenttrace.storage.base import Trace
+from agenttrace.storage.jsonl import JsonlBackend
+from agenttrace.storage.sqlite import SqliteBackend
 
 PASS = "\033[32mPASS\033[0m"
 FAIL = "\033[31mFAIL\033[0m"
@@ -83,7 +94,6 @@ print("\n═══════════════════════�
 print("2. RETRIEVAL CORRECTNESS")
 print("══════════════════════════════════════════════")
 
-from agenttrace.retrieval import rank
 
 # 2a. Results returned in descending similarity order
 stored = [
@@ -114,9 +124,6 @@ print(f"\n  5 traces above threshold, top_k=3 → {len(result_topk)} returned")
 check("top_k=3 with 5 candidates → 3 results", len(result_topk) == 3)
 
 # 2d. Nothing above threshold → empty list (core turns this into "")
-from unittest.mock import MagicMock
-from agenttrace.config import AgentTraceConfig
-from agenttrace.core import AgentTrace
 
 with tempfile.TemporaryDirectory() as tmp:
     cfg = AgentTraceConfig(backend="jsonl",
@@ -142,9 +149,6 @@ print("\n═══════════════════════�
 print("3. STORAGE CORRECTNESS")
 print("══════════════════════════════════════════════")
 
-from agenttrace.storage.jsonl import JsonlBackend
-from agenttrace.storage.sqlite import SqliteBackend
-from agenttrace.storage.base import Trace
 
 FIXED_EMBEDDING = [0.1, 0.25, -0.5, 0.99, 0.0]
 
@@ -166,7 +170,7 @@ with tempfile.TemporaryDirectory() as tmp:
     store.save(original)
     got = store.get("verify-001")
 
-    print(f"\n  JSONL round-trip fields:")
+    print("\n  JSONL round-trip fields:")
     print(f"    id={got.id}, task='{got.task}', errors={got.errors}, tags={got.tags}")
     check("JSONL: all fields intact",
           got.id == original.id and
@@ -230,8 +234,6 @@ print("\n═══════════════════════�
 print("4. INJECTION CORRECTNESS")
 print("══════════════════════════════════════════════")
 
-from agenttrace.injection import format_traces
-from agenttrace.storage.base import Trace
 
 t = Trace(
     id="inj-1",
@@ -247,7 +249,7 @@ t = Trace(
 )
 formatted = format_traces([(t, 0.87)])
 
-print(f"\n  Formatted output:\n")
+print("\n  Formatted output:\n")
 for line in formatted.splitlines():
     print(f"    {line}")
 
@@ -272,9 +274,6 @@ print("\n═══════════════════════�
 print("5. CONFIG CORRECTNESS")
 print("══════════════════════════════════════════════")
 
-import json
-from pathlib import Path
-from agenttrace.config import load_config, AgentTraceConfig, _KNOWN_KEYS
 
 # 5a. Default threshold is 0.5
 default_cfg = AgentTraceConfig()
@@ -335,5 +334,5 @@ if _failures:
         print(f"    ✗ {f}")
     sys.exit(1)
 else:
-    print(f"\n  All checks PASSED.")
+    print("\n  All checks PASSED.")
     sys.exit(0)

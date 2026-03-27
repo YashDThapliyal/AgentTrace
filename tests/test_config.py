@@ -1,11 +1,10 @@
 """Tests for agenttrace.config — AgentTraceConfig and load_config()."""
 import json
-import os
 from pathlib import Path
 
 import pytest
 
-from agenttrace.config import AgentTraceConfig, load_config
+from agenttrace.config import load_config
 
 
 class TestDefaults:

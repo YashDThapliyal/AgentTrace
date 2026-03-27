@@ -16,6 +16,10 @@ from __future__ import annotations
 import os
 import sys
 
+from openai import OpenAI
+
+import agenttrace
+
 # ─── Validate API key early ───────────────────────────────────────────────────
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
@@ -24,9 +28,6 @@ if not OPENAI_API_KEY:
         "Add it to ~/.zshrc and run: source ~/.zshrc"
     )
     sys.exit(1)
-
-import agenttrace
-from openai import OpenAI
 
 # ─── Initialize ───────────────────────────────────────────────────────────────
 # Clear demo store before each run for clean results.
@@ -225,7 +226,7 @@ summary.append({
 print(f"\n{'═' * 60}")
 print("  SUMMARY")
 print(f"{'═' * 60}")
-print(f"  Traces saved: 3  (rounds 1–3; round 4 not saved)\n")
+print("  Traces saved: 3  (rounds 1–3; round 4 not saved)\n")
 
 for entry in summary:
     n = entry["round"]
@@ -242,5 +243,5 @@ print("    Round 2 → context (duplicate-list traces are semantically similar)"
 print("    Round 3 → cold    (SQL domain, nothing in store yet)")
 print("    Round 4 → context (SQL aggregation traces are semantically similar)")
 print()
-print(f"  Demo store: ./demo/demo_traces.jsonl")
+print("  Demo store: ./demo/demo_traces.jsonl")
 print(f"{'═' * 60}\n")
