@@ -24,7 +24,7 @@ class TestDefaults:
         assert cfg.backend == "jsonl"
         assert cfg.embeddings_provider == "local"
         assert cfg.top_k == 3
-        assert cfg.threshold == 0.75
+        assert cfg.threshold == 0.5
         assert cfg.store_path.endswith("traces.jsonl")
 
 
@@ -102,7 +102,7 @@ class TestProjectConfigFile:
         assert cfg.store_path == "/tmp/project.db"
         assert cfg.top_k == 3  # still default
 
-    def test_project_config_overrides_env_vars(self, tmp_path, monkeypatch):
+    def test_env_vars_override_project_config(self, tmp_path, monkeypatch):
         monkeypatch.chdir(tmp_path)
         monkeypatch.setenv("AGENTTRACE_BACKEND", "jsonl")
         monkeypatch.setattr("agenttrace.config._GLOBAL_CONFIG_PATH", tmp_path / "no-config.json")
@@ -110,7 +110,7 @@ class TestProjectConfigFile:
         (tmp_path / ".agenttrace.json").write_text(json.dumps({"backend": "sqlite"}))
 
         cfg = load_config()
-        assert cfg.backend == "sqlite"
+        assert cfg.backend == "jsonl"
 
     def test_malformed_project_config_raises(self, tmp_path, monkeypatch):
         monkeypatch.chdir(tmp_path)
@@ -199,7 +199,7 @@ class TestStorePath:
 
 class TestPriorityOrdering:
     def test_full_priority_chain(self, tmp_path, monkeypatch):
-        """explicit > project > global > env > defaults"""
+        """explicit > env > project > global > defaults"""
         monkeypatch.chdir(tmp_path)
 
         # env var
@@ -213,10 +213,10 @@ class TestPriorityOrdering:
         # project config
         (tmp_path / ".agenttrace.json").write_text(json.dumps({"top_k": 3}))
 
-        # explicit
+        # explicit beats all
         cfg = load_config(top_k=4)
         assert cfg.top_k == 4
 
-        # project beats global and env
+        # env var beats project and global
         cfg2 = load_config()
-        assert cfg2.top_k == 3
+        assert cfg2.top_k == 1

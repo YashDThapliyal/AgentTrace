@@ -2,9 +2,9 @@
 
 Resolution order (highest → lowest priority):
   1. Explicit kwargs passed to load_config()
-  2. .agenttrace.json in current working directory
-  3. ~/.agenttrace/config.json (global config)
-  4. Environment variables (AGENTTRACE_*)
+  2. Environment variables (AGENTTRACE_*)
+  3. .agenttrace.json in current working directory
+  4. ~/.agenttrace/config.json (global config)
   5. Dataclass defaults
 """
 from __future__ import annotations
@@ -38,7 +38,7 @@ class AgentTraceConfig:
     )
     embeddings_provider: str = "local"
     top_k: int = 3
-    threshold: float = 0.75
+    threshold: float = 0.5
 
 
 def _read_json_file(path: Path, label: str) -> dict[str, object]:
@@ -84,20 +84,21 @@ def load_config(**overrides: object) -> AgentTraceConfig:
     # Start with defaults
     merged: dict[str, object] = {}
 
-    # Layer 4: env vars
-    merged.update(_read_env())
-
-    # Layer 3: global config (~/.agenttrace/config.json)
+    # Layer 5 → 4 → 3: file configs (lowest file priority first)
+    # Layer 4: global config (~/.agenttrace/config.json)
     global_path = _GLOBAL_CONFIG_PATH
     if isinstance(global_path, Path) and global_path.exists():
         merged.update(_read_json_file(global_path, str(global_path)))
 
-    # Layer 2: project config (.agenttrace.json in cwd)
+    # Layer 3: project config (.agenttrace.json in cwd)
     project_path = Path.cwd() / _PROJECT_CONFIG_NAME
     if project_path.exists():
         merged.update(_read_json_file(project_path, _PROJECT_CONFIG_NAME))
 
-    # Layer 1: explicit overrides
+    # Layer 2: env vars override all file configs
+    merged.update(_read_env())
+
+    # Layer 1: explicit overrides beat everything
     merged.update({k: v for k, v in overrides.items() if k in _KNOWN_KEYS})
 
     # Build config, expanding ~ in store_path

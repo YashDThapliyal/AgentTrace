@@ -159,6 +159,9 @@ class TestPublicAPI:
     def test_auto_init_on_recall(self, tmp_path, monkeypatch):
         monkeypatch.chdir(tmp_path)
         monkeypatch.setattr("agenttrace.config._GLOBAL_CONFIG_PATH", tmp_path / "no.json")
+        # Redirect store to a fresh temp path so this test is isolated from
+        # the real global store (which may contain traces from manual usage).
+        monkeypatch.setenv("AGENTTRACE_STORE_PATH", str(tmp_path / "traces.jsonl"))
         import agenttrace
         agenttrace._instance = None
         # Should not raise — auto-inits with defaults

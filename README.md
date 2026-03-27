@@ -92,7 +92,7 @@ Example `.agenttrace.json`:
   "embeddings_provider": "local",
   "recall": {
     "top_k": 3,
-    "threshold": 0.75
+    "threshold": 0.5
   }
 }
 ```
