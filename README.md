@@ -1,4 +1,6 @@
-# AgentTrace
+
+# AgentTrace<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/d058d5a3-ba3c-4f53-b48b-22911b3dd933" />
+
 
 > Reasoning memory for AI agents. Save what worked. Recall it next time.
 
